@@ -1,0 +1,36 @@
+[triage] run 4ad3d37141eb: 1 findings from /home/hatch/workspace/dorahacks-cortensor-2418/findings_sample
+
+[1/1] 01-xss-login: Reflected XSS in login error page (model openai/gpt-oss-20b)
+    [permission] ALLOW tool=recall_verdicts reason=fc_7936a80b-686a-46df-9d96-a380c7a7743e
+    [attempt 1] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on tokens per minute (TPM
+    [retry] rate-limited, sleeping 70s ...
+    [attempt 2] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on tokens per minute (TPM
+    [retry] rate-limited, sleeping 70s ...
+    [permission] ALLOW tool=recall_verdicts reason=fc_db8e4ec8-1e87-41f6-823f-d48e9ab5feba
+    [attempt 3] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on tokens per minute (TPM
+    -> model_error  conf=0.00 tokens=0+0 calls=0 tools=0 attempts=3 210.7s
+    reason: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `openai/gpt-oss-20b` in o
+
+================ RUN SUMMARY ================
+{
+  "run_id": "4ad3d37141eb",
+  "started_at": "2026-11-21T12:29:19Z",
+  "duration_s": 214.2,
+  "model_route": "groq (openai-compatible) via OpenMinion groq provider",
+  "models": [
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-120b"
+  ],
+  "counts": {
+    "accepted": 0,
+    "duplicates": 0,
+    "rejected": 0,
+    "model_errors": 1
+  },
+  "total_input_tokens": 0,
+  "total_output_tokens": 0,
+  "total_llm_calls": 0,
+  "total_tool_calls": 0
+}
+  01-xss-login  model_error -        conf=0.00 model=gpt-oss-20b attempts=3
+summary saved: /home/hatch/workspace/dorahacks-cortensor-2418/run-summary.json

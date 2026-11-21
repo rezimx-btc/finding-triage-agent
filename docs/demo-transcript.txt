@@ -1,0 +1,124 @@
+[triage] run 96d516f91a93: 10 findings from /home/hatch/workspace/dorahacks-cortensor-2418/findings_sample
+
+[1/10] 01-xss-login: Reflected XSS in login error page (model openai/gpt-oss-120b)
+    [tpm] openai/gpt-oss-120b: 3589 tokens remaining (reset 33.082s)
+    [tpm] openai/gpt-oss-120b: 6386 tokens remaining (reset 12.105s)
+    [tpm] openai/gpt-oss-120b: 7927 tokens remaining (reset Nones)
+    [permission] ALLOW tool=record_verdict reason=fc_b094b63f-cca0-4a5d-8f2d-94cb265a9da7
+    [attempt 1] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on tokens per minute (TP
+    [attempt 1] verdict already recorded despite the error
+    -> accept High conf=0.95 tokens=0+0 calls=0 tools=0 attempts=1 66.0s
+    reason: The finding includes reproducible steps: submitting the payload `<script>alert(1)</script>` as the username causes the login error page to reflect the input without encoding, resulting in script execution in the victim's
+
+[2/10] 02-xss-login-duplicate: Login page echoes username unsafely (model qwen/qwen3.8-27b)
+    [tpm] qwen/qwen3.8-27b: 7986 tokens remaining (reset Nones)
+    [permission] ALLOW tool=record_verdict reason=9ve6jgrg9
+    [attempt 1] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on input tokens per minute 
+    [attempt 1] verdict already recorded despite the error
+    -> duplicate  conf=0.95 tokens=0+0 calls=0 tools=0 attempts=1 18.6s
+    duplicate of: 01-xss-login
+    reason: This finding reports a reflected XSS on the same login error page (https://example-shop.test/login) triggered by the same unsanitized username field on a failed sign-in — identical target, input source, sink, and reprodu
+
+[3/10] 03-sqli-search: SQL injection in product search (model openai/gpt-oss-120b)
+    [tpm] openai/gpt-oss-120b: 7927 tokens remaining (reset Nones)
+    [permission] ALLOW tool=record_verdict reason=fc_d753d881-4e6a-49f0-9b20-493ba8b53ea4
+    [attempt 1] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on tokens per minute (TP
+    [attempt 1] verdict already recorded despite the error
+    -> accept Critical conf=0.96 tokens=0+0 calls=0 tools=0 attempts=1 23.8s
+    reason: The finding provides concrete evidence of an exploitable SQL injection: the `q` parameter of https://example-shop.test/search?q= is concatenated directly into a SQL query. The supplied payloads (`' OR '1'='1` and `' UNIO
+
+[4/10] 04-sqli-search-duplicate: Search box lets me read the whole database (model qwen/qwen3.8-27b)
+    [tpm] qwen/qwen3.8-27b: 7986 tokens remaining (reset Nones)
+    [permission] ALLOW tool=record_verdict reason=3wex6hkmx
+    [attempt 1] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on input tokens per minute 
+    [attempt 1] verdict already recorded despite the error
+    -> duplicate  conf=0.90 tokens=0+0 calls=0 tools=0 attempts=1 12.1s
+    duplicate of: 03-sqli-search
+    reason: Same root cause as session-memory finding 03-sqli-search: unsanitized `q` query string passed directly into the product search database query (no parameterization). Both reports target https://example-shop.test/search?q=
+
+[5/10] 05-no-rate-limit-login: No rate limiting on login attempts (model openai/gpt-oss-120b)
+    [tpm] openai/gpt-oss-120b: 7927 tokens remaining (reset Nones)
+    [permission] ALLOW tool=record_verdict reason=fc_89698753-7a0a-47b7-bd47-ca41ea065c2a
+    [attempt 1] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on tokens per minute (TP
+    [attempt 1] verdict already recorded despite the error
+    -> accept High conf=0.95 tokens=0+0 calls=0 tools=0 attempts=1 14.6s
+    reason: The report demonstrates that 200 consecutive failed login attempts from a single IP were processed without any block, throttle, lockout, or CAPTCHA challenge, indicating the login endpoint lacks any rate limiting or brut
+
+[6/10] 06-stack-trace-leak: Error page leaks stack trace with file paths (model qwen/qwen3.8-27b)
+    [tpm] qwen/qwen3.8-27b: 7986 tokens remaining (reset Nones)
+    [permission] ALLOW tool=record_verdict reason=xna1v47t4
+    [attempt 1] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on input tokens per minute 
+    [attempt 1] verdict already recorded despite the error
+    -> accept Medium conf=0.80 tokens=0+0 calls=0 tools=0 attempts=1 15.8s
+    reason: The finding identifies a concrete, reproducible issue: error responses on https://example-shop.test/checkout include full stack traces with internal file paths and library versions, which aids attackers in mapping the te
+
+[7/10] 07-outdated-jquery: Site ships outdated jQuery 1.12.4 (model openai/gpt-oss-120b)
+    [tpm] openai/gpt-oss-120b: 7927 tokens remaining (reset Nones)
+    [permission] ALLOW tool=record_verdict reason=fc_64be9cc6-5283-4050-bd8c-0e8ae7ca3d6b
+    [attempt 1] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on tokens per minute (TP
+    [attempt 1] verdict already recorded despite the error
+    -> reject  conf=0.95 tokens=0+0 calls=0 tools=0 attempts=1 33.2s
+    reason: The report only notes that the homepage loads an old jQuery 1.12.4 library but explicitly states that no reachable vulnerability or exploit path was found; the known XSS issues require attacker-controlled selectors which
+
+[8/10] 08-csrf-password-change: CSRF on password change form (model qwen/qwen3.8-27b)
+    [tpm] qwen/qwen3.8-27b: 7986 tokens remaining (reset Nones)
+    [permission] ALLOW tool=record_verdict reason=55j5cktbe
+    [attempt 1] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on input tokens per minute 
+    [attempt 1] verdict already recorded despite the error
+    -> accept High conf=0.92 tokens=0+0 calls=0 tools=0 attempts=1 12.4s
+    reason: Solid, reproducible finding on a concrete target (https://example-shop.test/account/password): the state-changing password POST lacks an anti-CSRF token, and the reporter provides working proof (a cross-origin form that 
+
+[9/10] 09-open-redirect: Open redirect via next parameter after login (model openai/gpt-oss-120b)
+    [tpm] openai/gpt-oss-120b: 7927 tokens remaining (reset Nones)
+    [attempt 1] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on tokens per minute (TP
+    [retry] rate-limited, waiting for headroom on qwen/qwen3.8-27b ...
+    [tpm] qwen/qwen3.8-27b: 7828 tokens remaining (reset 1.465s)
+    [attempt 2] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Request too large for model `qwen/qwen3.8-27b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on output tokens per minute 
+    [retry] rate-limited, waiting for headroom on openai/gpt-oss-120b ...
+    [tpm] openai/gpt-oss-120b: 7509 tokens remaining (reset 3.682s)
+    [permission] ALLOW tool=record_verdict reason=fc_966eb891-1cab-4e01-8bde-af6d52f61ea2
+    [attempt 3] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on tokens per minute (TP
+    [attempt 3] verdict already recorded despite the error
+    -> accept Medium conf=0.95 tokens=0+0 calls=0 tools=0 attempts=3 52.2s
+    reason: The finding provides concrete evidence of an open redirect vulnerability: the login page redirects to any URL supplied in the `next` parameter without allowlist validation. An attacker can craft a link such as `?next=htt
+
+[10/10] 10-vague-insecure: Site looks insecure (model qwen/qwen3.8-27b)
+    [tpm] qwen/qwen3.8-27b: 7986 tokens remaining (reset Nones)
+    [permission] ALLOW tool=record_verdict reason=vzhw9qs97
+    [attempt 1] FAILED: ProviderError: RATE_LIMITED: The configured model provider could not continue this turn because it reported a quota, billing, or rate-limit block (groq rate limited: Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m7tfe3kkeqkvwdvh9mb56t9r` service tier `on_demand` on input tokens per minute 
+    [attempt 1] verdict already recorded despite the error
+    -> reject  conf=0.90 tokens=0+0 calls=0 tools=0 attempts=1 11.9s
+    reason: The finding is purely a subjective impression ("feels insecure", "bad feeling", "a hacker could probably get in somehow") with, by its own admission, no specific page, no reproduction steps, no payload, and no observed b
+
+================ RUN SUMMARY ================
+{
+  "run_id": "96d516f91a93",
+  "started_at": "2026-11-21T13:33:00Z",
+  "duration_s": 488.7,
+  "model_route": "groq (openai-compatible) via OpenMinion groq provider",
+  "models": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.8-27b"
+  ],
+  "counts": {
+    "accepted": 6,
+    "duplicates": 2,
+    "rejected": 2,
+    "model_errors": 0
+  },
+  "total_input_tokens": 0,
+  "total_output_tokens": 0,
+  "total_llm_calls": 0,
+  "total_tool_calls": 0
+}
+  01-xss-login  accept     High     conf=0.95 model=gpt-oss-120b attempts=1
+  02-xss-login-duplicate  duplicate  -        conf=0.95 model=qwen3.8-27b attempts=1
+  03-sqli-search  accept     Critical conf=0.96 model=gpt-oss-120b attempts=1
+  04-sqli-search-duplicate  duplicate  -        conf=0.90 model=qwen3.8-27b attempts=1
+  05-no-rate-limit-login  accept     High     conf=0.95 model=gpt-oss-120b attempts=1
+  06-stack-trace-leak  accept     Medium   conf=0.80 model=qwen3.8-27b attempts=1
+  07-outdated-jquery  reject     -        conf=0.95 model=gpt-oss-120b attempts=1
+  08-csrf-password-change  accept     High     conf=0.92 model=qwen3.8-27b attempts=1
+  09-open-redirect  accept     Medium   conf=0.95 model=gpt-oss-120b attempts=3
+  10-vague-insecure  reject     -        conf=0.90 model=qwen3.8-27b attempts=1
+summary saved: /home/hatch/workspace/dorahacks-cortensor-2418/run-summary.json
