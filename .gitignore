@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Secrets — never commit
+.env
+.env.*
+
+# OpenMinion runtime state -- regenerated per run. Only the two config
+# files are committed (they carry no secrets: all api_key fields are empty,
+# keys come from env vars). Everything else under .openminion/ (state DBs,
+# sessions, brain/memory stores, policy snapshots, telemetry) is local
+# runtime state and must NOT be committed.
+.openminion/*
+!.openminion/agents.json
+!.openminion/agents-ollama.json
+
+# Editor / OS
+.DS_Store
