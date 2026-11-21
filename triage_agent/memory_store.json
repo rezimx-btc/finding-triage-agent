@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "verdicts": [
+    {
+      "finding_id": "01-xss-login",
+      "title": "Reflected XSS in login error page",
+      "target": "https://example-shop.test/login",
+      "body": "# Reflected XSS in login error page\n\nTarget: https://example-shop.test/login\n\nSteps:\n1. Go to the login page and submit username `<script>alert(1)</script>` with any password.\n2. The error page reflects the submitted username inside the HTML without encoding.\n3. The script executes in the victim's browser.\n\nImpact: an attacker can craft a login link that runs JavaScript in a victim's\nsession and steal the session cookie. Reflected input, no encoding, error page.",
+      "status": "accept",
+      "severity": "High",
+      "confidence": 0.95,
+      "reason": "The finding includes reproducible steps: submitting the payload `<script>alert(1)</script>` as the username causes the login error page to reflect the input without encoding, resulting in script execution in the victim's browser. This demonstrates a reflected XSS that can be used to steal session cookies, providing clear evidence of a high‑severity issue.",
+      "duplicate_of": "",
+      "stored_at": "2026-11-21T13:34:05Z"
+    },
+    {
+      "finding_id": "02-xss-login-duplicate",
+      "title": "Login page echoes username unsafely",
+      "target": "https://example-shop.test/login",
+      "body": "# Login page echoes username unsafely\n\nTarget: https://example-shop.test/login\n\nWhen I type a username containing HTML into the sign-in form and submit a\nwrong password, the failure message shows my username back on the page and\nthe browser runs it as code. Tried `<img src=x onerror=alert(2)>` and the\nalert popped. Same login error page, same username field, no output encoding.",
+      "status": "duplicate",
+      "severity": "",
+      "confidence": 0.95,
+      "reason": "This finding reports a reflected XSS on the same login error page (https://example-shop.test/login) triggered by the same unsanitized username field on a failed sign-in — identical target, input source, sink, and reproduction to the earlier accepted finding 01-xss-login (\"Reflected XSS in login error page,\" severity High). The only deltas are cosmetic (specific payload `<img src=x onerror=alert(2)>`), so it shares the same root cause and is a duplicate rather than a new issue.",
+      "duplicate_of": "01-xss-login",
+      "stored_at": "2026-11-21T13:34:49Z"
+    },
+    {
+      "finding_id": "03-sqli-search",
+      "title": "SQL injection in product search",
+      "target": "https://example-shop.test/search?q=",
+      "body": "The search parameter q is concatenated directly into a SQL query. Payload: ' OR '1'='1 returns all products. Payload: ' UNION SELECT username,password FROM users-- dumps the users table including password hashes. Search endpoint, q parameter, unsanitized SQL concatenation, full database read.",
+      "status": "accept",
+      "severity": "Critical",
+      "confidence": 0.96,
+      "reason": "The finding provides concrete evidence of an exploitable SQL injection: the `q` parameter of https://example-shop.test/search?q= is concatenated directly into a SQL query. The supplied payloads (`' OR '1'='1` and `' UNION SELECT username,password FROM users--`) successfully return all products and dump the users table with password hashes, demonstrating full database read. This demonstrates a clear vulnerability with high impact, justifying a Critical severity.",
+      "duplicate_of": "",
+      "stored_at": "2026-11-21T13:35:38Z"
+    },
+    {
+      "finding_id": "04-sqli-search-duplicate",
+      "title": "Search box lets me read the whole database",
+      "target": "https://example-shop.test/search?q=",
+      "body": "# Search box lets me read the whole database\n\nTarget: https://example-shop.test/search?q=\n\nTyping `' OR 1=1 --` into the search box lists every product instead of\nerroring. With a UNION payload I could pull rows from the users table. The\nq query string goes straight into the database query with no sanitizing or\nparameters. Search endpoint SQL injection, full read access.",
+      "status": "duplicate",
+      "severity": "",
+      "confidence": 0.9,
+      "reason": "Same root cause as session-memory finding 03-sqli-search: unsanitized `q` query string passed directly into the product search database query (no parameterization). Both reports target https://example-shop.test/search?q= with the `' OR 1=1 --` payload listing all products and a UNION-based row read of the users table. This report restates that bug rather than introducing a new endpoint, vector, or effect, so it should be merged into 03-sqli-search.",
+      "duplicate_of": "03-sqli-search",
+      "stored_at": "2026-11-21T13:36:14Z"
+    },
+    {
+      "finding_id": "05-no-rate-limit-login",
+      "title": "No rate limiting on login attempts",
+      "target": "https://example-shop.test/login",
+      "body": "# No rate limiting on login attempts\n\nTarget: https://example-shop.test/login\n\nI sent 200 failed login attempts for the same account in under a minute from\none IP and never got blocked, throttled, or CAPTCHA-challenged. An attacker\ncan brute-force passwords indefinitely. Login endpoint, no lockout, no\nrate limit, no CAPTCHA after failures.",
+      "status": "accept",
+      "severity": "High",
+      "confidence": 0.95,
+      "reason": "The report demonstrates that 200 consecutive failed login attempts from a single IP were processed without any block, throttle, lockout, or CAPTCHA challenge, indicating the login endpoint lacks any rate limiting or brute‑force mitigation. This allows an attacker to repeatedly guess passwords, potentially leading to credential compromise, which constitutes a high‑severity security issue.",
+      "duplicate_of": "",
+      "stored_at": "2026-11-21T13:36:54Z"
+    },
+    {
+      "finding_id": "06-stack-trace-leak",
+      "title": "Error page leaks stack trace with file paths",
+      "target": "https://example-shop.test/checkout",
+      "body": "# Error page leaks stack trace with file paths\n\nTarget: https://example-shop.test/checkout\n\nTriggering an error on the checkout page returns a full stack trace in the\nresponse, including internal file paths and library versions. No sensitive\ndata or credentials in the trace, but it helps an attacker map the stack.\nVerbose error, internal paths disclosed.",
+      "status": "accept",
+      "severity": "Medium",
+      "confidence": 0.8,
+      "reason": "The finding identifies a concrete, reproducible issue: error responses on https://example-shop.test/checkout include full stack traces with internal file paths and library versions, which aids attackers in mapping the tech stack and crafting targeted exploits. No sensitive data or credentials are exposed, and there is no direct data exfiltration, so this is not Critical/High, but it is a classic information-disclosure weakness (CWE-209) that meaningfully lowers the bar for follow-on attacks — Medium is appropriate. No past similar verdicts exist, so it is not a duplicate.",
+      "duplicate_of": "",
+      "stored_at": "2026-11-21T13:37:35Z"
+    },
+    {
+      "finding_id": "07-outdated-jquery",
+      "title": "Site ships outdated jQuery 1.12.4",
+      "target": "https://example-shop.test/",
+      "body": "# Site ships outdated jQuery 1.12.4\n\nTarget: https://example-shop.test/\n\nThe homepage loads jQuery 1.12.4, released years ago. I found no reachable\nvulnerability: the known XSS issues in that version need attacker-controlled\nselectors that this site does not use. Old library version only, no exploit\npath demonstrated, no affected sink.",
+      "status": "reject",
+      "severity": "",
+      "confidence": 0.95,
+      "reason": "The report only notes that the homepage loads an old jQuery 1.12.4 library but explicitly states that no reachable vulnerability or exploit path was found; the known XSS issues require attacker-controlled selectors which are not present, and no affected sink is demonstrated. Without concrete evidence of an exploitable issue, the finding lacks the necessary observable effect and should be rejected.",
+      "duplicate_of": "",
+      "stored_at": "2026-11-21T13:38:32Z"
+    },
+    {
+      "finding_id": "08-csrf-password-change",
+      "title": "CSRF on password change form",
+      "target": "https://example-shop.test/account/password",
+      "body": "The password-change form has no anti-CSRF token. I built a page on another origin that auto-submits a POST to /account/password with a new password, and while logged in as the victim the password changed. Any site the victim visits can take over the account. Missing CSRF token, state-changing POST, full account takeover.",
+      "status": "accept",
+      "severity": "High",
+      "confidence": 0.92,
+      "reason": "Solid, reproducible finding on a concrete target (https://example-shop.test/account/password): the state-changing password POST lacks an anti-CSRF token, and the reporter provides working proof (a cross-origin form that auto-submits and successfully changes a logged-in victim's password). That combination — missing token, state-changing endpoint, confirmed exploitation leading to full account takeover — is a real CSRF vulnerability. I rate it High rather than Critical: a CSRF-based forced password change can be severe and give account takeover, but it requires the victim to be logged in with an active session and to visit the attacker page in that session, a slightly narrower window than unconditional RCE or mass data breach; impact severity (account takeover, data exfiltration of personal info and stored payment details if the shop holds them) supports High.",
+      "duplicate_of": "",
+      "stored_at": "2026-11-21T13:39:10Z"
+    },
+    {
+      "finding_id": "09-open-redirect",
+      "title": "Open redirect via next parameter after login",
+      "target": "https://example-shop.test/login?next=",
+      "body": "# Open redirect via next parameter after login\n\nTarget: https://example-shop.test/login?next=\n\nAfter login the site redirects to whatever URL is in the `next` parameter\nwith no allowlist check. `?next=https://evil.example/phish` sends the user\nto an attacker page. Useful for phishing, but no token or session is leaked\nby the redirect itself. Open redirect, unvalidated next parameter.",
+      "status": "accept",
+      "severity": "Medium",
+      "confidence": 0.95,
+      "reason": "The finding provides concrete evidence of an open redirect vulnerability: the login page redirects to any URL supplied in the `next` parameter without allowlist validation. An attacker can craft a link such as `?next=https://evil.example/phish` to redirect authenticated users to a malicious site, enabling phishing attacks. While no session token or credentials are leaked directly by the redirect, the ability to deceive users into visiting malicious sites constitutes a medium‑severity impact. The description is clear and reproducible, giving high confidence in the finding.",
+      "duplicate_of": "",
+      "stored_at": "2026-11-21T13:40:27Z"
+    },
+    {
+      "finding_id": "10-vague-insecure",
+      "title": "Site looks insecure",
+      "target": "https://example-shop.test/",
+      "body": "# Site looks insecure\n\nTarget: https://example-shop.test/\n\nThe site just feels insecure to me. I have a bad feeling about it and I\nthink a hacker could probably get in somehow. No specific page, no steps to\nreproduce, no payload, no observed behaviour. Just a general impression.",
+      "status": "reject",
+      "severity": "",
+      "confidence": 0.9,
+      "reason": "The finding is purely a subjective impression (\"feels insecure\", \"bad feeling\", \"a hacker could probably get in somehow\") with, by its own admission, no specific page, no reproduction steps, no payload, and no observed behavior. There is no concrete evidence, target endpoint, or reproducible effect to verify or triage, so it fails the basic evidence bar and must be rejected.",
+      "duplicate_of": "",
+      "stored_at": "2026-11-21T13:41:04Z"
+    }
+  ]
+}
